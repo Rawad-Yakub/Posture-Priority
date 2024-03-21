@@ -33,7 +33,7 @@ st.title('Posture Priority')
 
 @st.cache_resource()
 def init_connection():
-    uri = "mongodb+srv://testuser:testuser@capstonedbv1.wzzhaed.mongodb.net/?retryWrites=true&w=majority&appName=CapstoneDBv1"# Create a new client and connect to the server
+    uri = "replacethisstring"# Create a new client and connect to the server
     return uri
 
 client = MongoClient(init_connection(), server_api=ServerApi('1')) 
@@ -52,7 +52,7 @@ except Exception as e:
 ##conn.read("posturepriorityawsbucket/abc123.png", input_format="png", ttl=600)
 ##st.image(test_photo)
 ##fs = s3fs.S3FileSystem(anon=False)
-fs = s3fs.S3FileSystem(anon=False, key="AKIATCKAQM63ILL7CTVH", secret="JlFYRrgwel5oRd0qDkVq10CGN7Sjq76RdmZKGvpz")
+fs = s3fs.S3FileSystem(anon=False, key="replacethisstring", secret="replacethisstring")
 st.image(fs.open("posturepriorityawsbucket/abc123.png", mode='rb').read())
 
 
