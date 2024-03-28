@@ -3,10 +3,13 @@
 ##
 ##
 import streamlit as st ##1.12.0 originally
+import datetime
+from datetime import date
 
 from streamlit_image_coordinates import streamlit_image_coordinates     ##manually select points for posture evaluation
 from streamlit_image_comparison import image_comparison                 ##compare two postures
 from streamlit_plotly_events import plotly_events                       ##interactively view data on graphs
+import streamlit_authenticator as stauth                                ##user auth. in YAML
 
 import numpy as np
 ##import openai
@@ -16,9 +19,13 @@ import pandas as pd
 import pymongo
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
+##from pymongo_get_database import get_database
 
 import s3fs
 from st_files_connection import FilesConnection
+
+import yaml
+from yaml.loader import SafeLoader
 
 st.set_page_config(
     page_title="Posture Priority",
@@ -27,13 +34,28 @@ st.set_page_config(
     initial_sidebar_state='auto'
 )
 
+currDate = str(date.today())
+
 st.title('Posture Priority')
+st.subheader(currDate)
 
 
+##################################################
+
+post = {
+
+    "username": "temp3",
+    "photo": "url",
+
+    "date": currDate
+
+}
+
+##################################################
 
 @st.cache_resource()
 def init_connection():
-    uri = "replacethisstring"# Create a new client and connect to the server
+    uri = "mongodb+srv://{user}:{password}@capstonedbv1.wzzhaed.mongodb.net/?retryWrites=true&w=majority&appName=CapstoneDBv1"# Create a new client and connect to the server
     return uri
 
 client = MongoClient(init_connection(), server_api=ServerApi('1')) 
@@ -46,36 +68,77 @@ except Exception as e:
     print(e)
     st.write("Connection to database failed. Invalid credentials")
 
+db = client.test_database
+collection = db['test_PP']
+##post_id = collection.insert_one(post).inserted_id
+##post_id
+##st.write(collection)
 
+
+##################################################
 
 ##conn = st.connection('s3', type=FilesConnection)
 ##conn.read("posturepriorityawsbucket/abc123.png", input_format="png", ttl=600)
 ##st.image(test_photo)
 ##fs = s3fs.S3FileSystem(anon=False)
-fs = s3fs.S3FileSystem(anon=False, key="replacethisstring", secret="replacethisstring")
+fs = s3fs.S3FileSystem(anon=False, key="", secret="")
+
+##################################################
+
+with open('config.yaml') as file:
+    config = yaml.load(file, Loader=SafeLoader)
+
+authenticator = stauth.Authenticate(
+    config['credentials'],
+    config['cookie']['name'],
+    config['cookie']['key'],
+    config['cookie']['expiry_days'],
+    config['preauthorized']
+)
+
+##temp vars for class or similar
+dailyPhotoUpload = False
+
+if st.session_state["authentication_status"]:
+    ##authenticator.logout()
+    st.write(f'Welcome *{st.session_state["name"]}*')
+    loggedIn = True
+    currUser = st.session_state["username"]
+    ##activeDates = fs.open("posturepriorityawsbucket/"+currUser, mode='rb').read()
+
+
+
+    if  dailyPhotoUpload:
+        uploaded_file = st.file_uploader("Upload a photo for today")
+        if uploaded_file is not None:
+            bytes_data = uploaded_file.getvalue()
+            st.image(bytes_data)
+
+            s3 = s3fs.S3FileSystem(anon=False)  # uses default credentials
+            if st.button("Upload this photo?"):
+                dailyPhotoUpload = True
+                with fs.open('posturepriorityawsbucket/'+currUser+'_'+currDate, 'wb') as f:
+                    f.write(bytes_data)
+    else:
+        if st.button("View or edit a certain day?"):
+            d = st.date_input("Choose a date")
+            if d in activeDates:
+                st.write("A photo was uploaded on this day")
+            else:
+                st.write("N/a")
+
+
+
+
+else:
+    st.subheader("Log in or sign up to get started")
+    st.page_link("pages/Login.py", label="Log in here", icon="💾")
+
 st.image(fs.open("posturepriorityawsbucket/abc123.png", mode='rb').read())
 
 
-
-##temp vars for class or similar
-loggedIn = False
-dailyPhotoUpload = False
-
-
-if not loggedIn:
-    st.subheader("Log in or sign up to get started")
-    st.page_link("pages/Login.py", label="Log in here", icon="💾")
     
-
-elif not dailyPhotoUpload:
-    st.subheader("Upload a photo for today")
-else:
-    st.subheader("Welcome back!")
-
-
-
-
-
+##st.write(db)
 
 ##print(client.list_database_names())
 
