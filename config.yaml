@@ -1,0 +1,24 @@
+cookie:
+  expiry_days: 30
+  key: some_signature_key
+  name: some_cookie_name
+credentials:
+  usernames:
+    aaa:
+      email: aaa@aaa.com
+      logged_in: false
+      name: AAA AAA
+      password:
+    jonelm01:
+      email: jonelm1901@gmail.com
+      logged_in: false
+      name: Jonel Muncan
+      password:
+    testuser00:
+      email: test@gmail.com
+      logged_in: false
+      name: Test User
+      password:
+preauthorized:
+  emails:
+  - melsby@gmail.com
