@@ -1,6 +1,8 @@
 import streamlit as st ##1.12.0 originally
 
 import streamlit_authenticator as stauth                                ##user auth. in YAML
+from streamlit_authenticator.utilities.hasher import Hasher
+
 
 import numpy as np                                       
 import pandas as pd
@@ -31,7 +33,7 @@ def local_css(file_name):
     with open(file_name) as f:
         st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
-local_css("signup_style.css")  # Update file name here
+#local_css("signup_style.css")  # Update file name here
 
 # Header
 ##st.markdown("<h1 class='header'>Posture Priority - Sign Up</h1>", unsafe_allow_html=True)
@@ -61,7 +63,7 @@ local_css("signup_style.css")  # Update file name here
 
 ###
 
-hashed_passwords = stauth.Hasher(['abc', 'def']).generate()
+hashed_passwords = Hasher(['abc', 'def']).generate()
 
 with open('config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
@@ -93,20 +95,21 @@ elif st.session_state["authentication_status"] is None:
 ##reg doesnt save password, have to fix
 ##considering putting config.yaml into s3 
 ##also manually doing registration widget and writing directly to yaml
+##maybe jus implement password chnanger, use abc as default password
 try:
-    email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user(preauthorization=False)
+    email_of_registered_user, username_of_registered_user, name_of_registered_user = authenticator.register_user()
     if email_of_registered_user:
         config['credentials']['usernames'][username_of_registered_user] = {
                 'email': email_of_registered_user,
                 'logged_in': False,                                             # Assuming new users are not logged in by default
                 'name': name_of_registered_user,
-                ##'password': '<hashed_password>'                                 # You should hash and store the password securely
+                ##'password': 'abc'                                 # You should hash and store the password securely
             }
         activeDates = {
             "upload_dates": currDate
         }
-        post_id = collection.insert_one(post).inserted_id
-        activeDates = fs.open("posturepriorityawsbucket/"+currUser, mode='rb')
+        #post_id = collection.insert_one(post).inserted_id
+        #activeDates = fs.open("posturepriorityawsbucket/"+currUser, mode='rb')
         st.success('User registered successfully')
         with open('config.yaml', 'w') as file:
             yaml.dump(config, file, default_flow_style=False)
@@ -123,4 +126,3 @@ if st.session_state["authentication_status"]:
             
     except Exception as e:
         st.error(e)
-
