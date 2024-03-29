@@ -6,9 +6,9 @@ import streamlit as st ##1.12.0 originally
 import datetime
 from datetime import date
 
-from streamlit_image_coordinates import streamlit_image_coordinates     ##manually select points for posture evaluation
-from streamlit_image_comparison import image_comparison                 ##compare two postures
-from streamlit_plotly_events import plotly_events                       ##interactively view data on graphs
+#from streamlit_image_coordinates import streamlit_image_coordinates     ##manually select points for posture evaluation
+#from streamlit_image_comparison import image_comparison                 ##compare two postures
+#from streamlit_plotly_events import plotly_events                       ##interactively view data on graphs
 import streamlit_authenticator as stauth                                ##user auth. in YAML
 
 import numpy as np
@@ -26,6 +26,7 @@ from st_files_connection import FilesConnection
 
 import yaml
 from yaml.loader import SafeLoader
+from dontcommit import my_config
 
 st.set_page_config(
     page_title="Posture Priority",
@@ -53,9 +54,11 @@ post = {
 
 ##################################################
 
+username, password, s3_key, s3_secret = my_config()
+
 @st.cache_resource()
 def init_connection():
-    uri = "mongodb+srv://{user}:{password}@capstonedbv1.wzzhaed.mongodb.net/?retryWrites=true&w=majority&appName=CapstoneDBv1"# Create a new client and connect to the server
+    uri = "mongodb+srv://"+ username + ":" + password + "@capstonedbv1.wzzhaed.mongodb.net/?retryWrites=true&w=majority&appName=CapstoneDBv1"# Create a new client and connect to the server
     return uri
 
 client = MongoClient(init_connection(), server_api=ServerApi('1')) 
@@ -81,10 +84,10 @@ collection = db['test_PP']
 ##conn.read("posturepriorityawsbucket/abc123.png", input_format="png", ttl=600)
 ##st.image(test_photo)
 ##fs = s3fs.S3FileSystem(anon=False)
-fs = s3fs.S3FileSystem(anon=False, key="", secret="")
+fs = s3fs.S3FileSystem(anon=False, key=s3_key, secret=s3_secret)
 
 ##################################################
-
+#this is gonna be in cloud or db for end product v
 with open('config.yaml') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
@@ -97,7 +100,7 @@ authenticator = stauth.Authenticate(
 )
 
 ##temp vars for class or similar
-dailyPhotoUpload = False
+dailyPhotoUploadPrompt = True
 
 if st.session_state["authentication_status"]:
     ##authenticator.logout()
@@ -108,7 +111,7 @@ if st.session_state["authentication_status"]:
 
 
 
-    if  dailyPhotoUpload:
+    if dailyPhotoUploadPrompt:
         uploaded_file = st.file_uploader("Upload a photo for today")
         if uploaded_file is not None:
             bytes_data = uploaded_file.getvalue()
@@ -116,10 +119,11 @@ if st.session_state["authentication_status"]:
 
             s3 = s3fs.S3FileSystem(anon=False)  # uses default credentials
             if st.button("Upload this photo?"):
-                dailyPhotoUpload = True
+                dailyPhotoUpload = False
                 with fs.open('posturepriorityawsbucket/'+currUser+'_'+currDate, 'wb') as f:
                     f.write(bytes_data)
     else:
+        ## jank
         if st.button("View or edit a certain day?"):
             d = st.date_input("Choose a date")
             if d in activeDates:
