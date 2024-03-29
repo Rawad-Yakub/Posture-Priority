@@ -8,17 +8,17 @@ credentials:
       email: aaa@aaa.com
       logged_in: false
       name: AAA AAA
-      password:
+      password: abc
     jonelm01:
       email: jonelm1901@gmail.com
       logged_in: false
       name: Jonel Muncan
-      password:
+      password: abc
     testuser00:
       email: test@gmail.com
       logged_in: false
       name: Test User
-      password:
+      password: abc
 preauthorized:
   emails:
   - melsby@gmail.com
