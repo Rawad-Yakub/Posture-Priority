@@ -6,19 +6,24 @@ credentials:
   usernames:
     aaa:
       email: aaa@aaa.com
+      failed_login_attempts: 0
       logged_in: false
       name: AAA AAA
-      password:
+      password: $2b$12$QgHiR4sxGeJ5SiGOK1TljOxZbtwjK44YJ4P/dBma8xGWmTachmSku
+    ember:
+      email: yakubrawad@gmail.com
+      logged_in: false
+      name: rawad
+      password: agag
     jonelm01:
       email: jonelm1901@gmail.com
+      failed_login_attempts: 0
       logged_in: false
       name: Jonel Muncan
-      password:
-    testuser00:
+      password: $2b$12$EuesHRnA6mELtv/kadyM2e12d4MS8Fl/kTWflDoQnGOyXX4uDMH0.
+    testuser:
       email: test@gmail.com
+      failed_login_attempts: 0
       logged_in: false
       name: Test User
-      password:
-preauthorized:
-  emails:
-  - melsby@gmail.com
+      password: $2b$12$8KPGJ1sqiEx2qV87tsdeNeXZfHyOqSPVcIQWRnGXIn2bw1TgYu28G
