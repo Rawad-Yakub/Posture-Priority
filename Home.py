@@ -35,25 +35,9 @@ st.set_page_config(
     initial_sidebar_state='auto'
 )
 
-currDate = str(date.today())
-
+CURR_DATE = str(date.today())
 st.title('Posture Priority')
-st.subheader(currDate)
-
-
-##################################################
-
-post = {
-
-    "username": "temp3",
-    "photo": "url",
-
-    "date": currDate
-
-}
-
-##################################################
-
+st.subheader("Today is " + CURR_DATE[6:])
 username, password, s3_key, s3_secret = my_config()
 
 @st.cache_resource()
@@ -73,17 +57,7 @@ except Exception as e:
 
 db = client.test_database
 collection = db['test_PP']
-##post_id = collection.insert_one(post).inserted_id
-##post_id
-##st.write(collection)
 
-
-##################################################
-
-##conn = st.connection('s3', type=FilesConnection)
-##conn.read("posturepriorityawsbucket/abc123.png", input_format="png", ttl=600)
-##st.image(test_photo)
-##fs = s3fs.S3FileSystem(anon=False)
 fs = s3fs.S3FileSystem(anon=False, key=s3_key, secret=s3_secret)
 
 ##################################################
@@ -109,46 +83,44 @@ if st.session_state["authentication_status"]:
     currUser = st.session_state["username"]
     ##activeDates = fs.open("posturepriorityawsbucket/"+currUser, mode='rb').read()
 
-
-
     if dailyPhotoUploadPrompt:
         uploaded_file = st.file_uploader("Upload a photo for today")
         if uploaded_file is not None:
             bytes_data = uploaded_file.getvalue()
             st.image(bytes_data)
 
-            s3 = s3fs.S3FileSystem(anon=False)  # uses default credentials
+            s3 = s3fs.S3FileSystem(anon=False)                                              ##uses default credentials
             if st.button("Upload this photo?"):
-                dailyPhotoUpload = False
-                with fs.open('posturepriorityawsbucket/'+currUser+'_'+currDate, 'wb') as f:
+                img_path_bucket = 'posturepriorityawsbucket/'+currUser+'_'+CURR_DATE
+                with fs.open(img_path_bucket, 'wb') as f: ##insert photo to s3 cloud
                     f.write(bytes_data)
+                    
+                post = {
+                    "username": currUser,
+                    "photo": img_path_bucket,
+                    "date": CURR_DATE
+                }
+                collection.insert_one(post) ##.inserted_id                                  ##insert post to db
+                dailyPhotoUploadPrompt = False
+                
+    st.header("Or, view an existing photo")
+
+    ## jank
+    d = st.date_input("Select a date")
+    photo_posted = collection.find_one({"date": str(d), "username": currUser})
+        
+    if photo_posted:
+        st.write("A photo was uploaded on this day")
+        view_photo = fs.open("posturepriorityawsbucket/"+currUser + '_' + CURR_DATE, mode='rb').read()
+        st.image(view_photo)
+            
     else:
-        ## jank
-        if st.button("View or edit a certain day?"):
-            d = st.date_input("Choose a date")
-            if d in activeDates:
-                st.write("A photo was uploaded on this day")
-            else:
-                st.write("N/a")
-
-
+        st.write("No photo was uploaded on this day")
 
 
 else:
     st.subheader("Log in or sign up to get started")
     st.page_link("pages/Login.py", label="Log in here", icon="💾")
 
-st.image(fs.open("posturepriorityawsbucket/abc123.png", mode='rb').read())
 
-
-    
-##st.write(db)
-
-##print(client.list_database_names())
-
-##@st.cache_resource()
-##def init_connection():
-##    return MongoClient("mongodb+srv://st.secrets.db_username:st.secrets.db_pswd@st.secrets.cluster_name.n4ycr4f.mongodb.net/?retryWrites=true&w=majority")
-
-##client = init_connection()
     
