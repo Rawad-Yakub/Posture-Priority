@@ -11,10 +11,6 @@ from datetime import date
 # from streamlit_plotly_events import plotly_events                       ##interactively view data on graphs
 import streamlit_authenticator as stauth  ##user auth. in YAML
 
-import numpy as np
-##import openai
-import plotly.express as px
-import pandas as pd
 
 import pymongo
 from pymongo.mongo_client import MongoClient
@@ -28,6 +24,10 @@ import yaml
 from yaml.loader import SafeLoader
 from dontcommit import my_config
 
+import cv2
+import mediapipe as mp
+import matplotlib.pyplot as plt
+import math as m
 
 st.set_page_config(
     page_title="Posture Priority",
@@ -154,4 +154,63 @@ st.image(fs.open("posturepriorityawsbucket/abc123.png", mode='rb').read())
 
 #### MODEL I THINK ###
 
+mp_pose = mp.solutions.pose
+mp_drawing = mp.solutions.drawing_utils
+pose = mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
+# Local file, have to change
+image = cv2.imread('test.jpg')
+image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+results = pose.process(image_rgb)
+
+# Draw landmarks on the image
+annotated_image = image.copy()
+if results.pose_landmarks:
+    mp_drawing.draw_landmarks(annotated_image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
+
+# Display the annotated image
+st.image(annotated_image, channels="RGB")
+
+
+def findAngle(x1, y1, x2, y2):
+    theta = m.acos( (y2 -y1)*(-y1) / (m.sqrt(
+        (x2 - x1)**2 + (y2 - y1)**2 ) * y1) )
+    degree = int(180/m.pi)*theta
+    return degree
+
+h, w = image_rgb.shape[:2]
+
+# Use lm and lmPose as representative of the following methods.
+lm = results.pose_landmarks
+lmPose = mp_pose.PoseLandmark
+# Left shoulder.
+l_shldr_x = int(lm.landmark[lmPose.LEFT_SHOULDER].x * w)
+l_shldr_y = int(lm.landmark[lmPose.LEFT_SHOULDER].y * h)
+
+# Right shoulder.
+r_shldr_x = int(lm.landmark[lmPose.RIGHT_SHOULDER].x * w)
+r_shldr_y = int(lm.landmark[lmPose.RIGHT_SHOULDER].y * h)
+
+# Left ear.
+l_ear_x = int(lm.landmark[lmPose.LEFT_EAR].x * w)
+l_ear_y = int(lm.landmark[lmPose.LEFT_EAR].y * h)
+
+# Left hip.
+l_hip_x = int(lm.landmark[lmPose.LEFT_HIP].x * w)
+l_hip_y = int(lm.landmark[lmPose.LEFT_HIP].y * h)
+
+# Calculate angles.
+neck_inclination = findAngle(l_shldr_x, l_shldr_y, l_ear_x, l_ear_y)
+torso_inclination = findAngle(l_hip_x, l_hip_y, l_shldr_x, l_shldr_y)
+
+
+# Put text, Posture and angle inclination.
+# Text string for display.
+angle_text_string = 'Neck : ' + str(int(neck_inclination)) + '  Torso : ' + str(int(torso_inclination))
+
+if neck_inclination > 40 or neck_inclination > 10:
+    st.write("bad posture")
+else:
+    st.write("good")
+st.write(angle_text_string)

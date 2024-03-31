@@ -2,3 +2,9 @@
 /.venv
 /.idea
 /dontcommit.py
+/pyvenv.cfg
+/Lib
+/Scripts
+/__pycache__/
+/myvenv/
+/test.jpg
