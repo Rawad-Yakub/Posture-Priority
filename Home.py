@@ -165,7 +165,7 @@ image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 results = pose.process(image_rgb)
 
 # Draw landmarks on the image
-annotated_image = image.copy()
+annotated_image = image_rgb.copy()
 if results.pose_landmarks:
     mp_drawing.draw_landmarks(annotated_image, results.pose_landmarks, mp_pose.POSE_CONNECTIONS)
 
