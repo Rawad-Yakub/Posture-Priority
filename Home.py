@@ -14,7 +14,7 @@ import streamlit_authenticator as stauth                                ##user a
 
 import numpy as np
 import matplotlib.pyplot as plt           ##new
-from openai import OpenAI
+#from openai import OpenAI
 
 import plotly.express as px                                             
 import pandas as pd
@@ -43,9 +43,8 @@ st.set_page_config(
 )
 
 CURR_DATE = str(date.today())
-st.title('Posture Priority')
-st.subheader("Today is " + CURR_DATE[6:])
-username, password, s3_key, s3_secret, GPT_key = my_config()
+ 
+username, password, s3_key, s3_secret = my_config() #commented ', GPT_key' out to test
 
 @st.cache_resource()
 def init_connection():
@@ -67,7 +66,7 @@ collection = db['test_PP']
 
 fs = s3fs.S3FileSystem(anon=False, key=s3_key, secret=s3_secret)        ##init s3 filesystem
 #openai.api_key = GPT_key                                                ##init openai
-GPT_Client = OpenAI(api_key=GPT_key)
+#GPT_Client = OpenAI(api_key=GPT_key)
 
 
 ##################################################
@@ -85,80 +84,86 @@ authenticator = stauth.Authenticate(
 
 ##temp vars for class or similar
 dailyPhotoUploadPrompt = True
+def page_display():
+    if st.session_state["authentication_status"]: #logged in
+        ##authenticator.logout()
+        st.write(f'Welcome *{st.session_state["name"]}*' + "\n Today is " + CURR_DATE)
+        loggedIn = True
+        currUser = st.session_state["username"]
+        ##activeDates = fs.open("posturepriorityawsbucket/"+currUser, mode='rb').read()
 
-if st.session_state["authentication_status"]:
-    ##authenticator.logout()
-    st.write(f'Welcome *{st.session_state["name"]}*')
-    loggedIn = True
-    currUser = st.session_state["username"]
-    ##activeDates = fs.open("posturepriorityawsbucket/"+currUser, mode='rb').read()
+        #Generate a response from ChatGPT using the question chat message
+        #question = "What are some exercises or stretches to improve " + my_Posture + "?"
+        #st.write(question)
+        #response = GPT_Client.chat.completions.create(model = "gpt-3.5-turbo",
+        #messages = [
+        #    {"role": "user", "content": question}
+        #],
+        #max_tokens=100,
+        #temperature=0.9,
+        #frequency_penalty=0.5,
+        #presence_penalty=0.5)
 
-    #Generate a response from ChatGPT using the question chat message
-    #question = "What are some exercises or stretches to improve " + my_Posture + "?"
-    #st.write(question)
-    #response = GPT_Client.chat.completions.create(model = "gpt-3.5-turbo",
-    #messages = [
-    #    {"role": "user", "content": question}
-    #],
-    #max_tokens=100,
-    #temperature=0.9,
-    #frequency_penalty=0.5,
-    #presence_penalty=0.5)
+        #Extract the answer from the response
+        #answer = response.choices[0].message.content
 
-    #Extract the answer from the response
-    #answer = response.choices[0].message.content
+        # Print the returned output from the LLM model
+        #st.write(str(answer))
 
-    # Print the returned output from the LLM model
-    #st.write(str(answer))
+        if dailyPhotoUploadPrompt:
+            uploaded_file = st.file_uploader("Upload a photo for today(png or jpg file)", type=['png', 'jpg'])
+            if uploaded_file is not None:
+                bytes_data = uploaded_file.getvalue()
+                st.image(bytes_data)
 
-    if dailyPhotoUploadPrompt:
-        uploaded_file = st.file_uploader("Upload a photo for today")
-        if uploaded_file is not None:
-            bytes_data = uploaded_file.getvalue()
-            st.image(bytes_data)
+                s3 = s3fs.S3FileSystem(anon=False)                                              ##uses default credentials
+                if st.button("Upload this photo?"):
+                    with fs.open('posturepriorityawsbucket/'+currUser+'_'+CURR_DATE, 'wb') as f: ##insert photo to s3 cloud
+                        f.write(bytes_data)
 
-            s3 = s3fs.S3FileSystem(anon=False)                                              ##uses default credentials
-            if st.button("Upload this photo?"):
-                with fs.open('posturepriorityawsbucket/'+currUser+'_'+CURR_DATE, 'wb') as f: ##insert photo to s3 cloud
-                    f.write(bytes_data)
+                    post = {
+                        "username": currUser,
+                        "photo": 'posturepriorityawsbucket/'+currUser+'_'+CURR_DATE,
+                        "date": CURR_DATE
+                    }
+                    collection.insert_one(post) ##.inserted_id                                  ##insert post to db
+                    dailyPhotoUploadPrompt = False
 
-                post = {
-                    "username": currUser,
-                    "photo": 'posturepriorityawsbucket/'+currUser+'_'+CURR_DATE,
-                    "date": CURR_DATE
-                }
-                collection.insert_one(post) ##.inserted_id                                  ##insert post to db
-                dailyPhotoUploadPrompt = False
+        st.header("Or, view an existing photo")
+        
+        ## jank
+        d = str(st.date_input("Select a date"))
+        st.write(d)
+        photo_posted = collection.find_one({"username": currUser, "date": d,})
 
-    st.header("Or, view an existing photo")
+        if photo_posted:
+            st.write("A photo was uploaded on this day")
+            #temp = str(currUser + '_'+d)
+            view_photo = fs.open("posturepriorityawsbucket/" + currUser + '_' + d, mode='rb').read()
+            #st.image(temp)
+            st.image(view_photo)
+            ##streamlit_image_coordinates(fs.open("posturepriorityawsbucket/"+currUser+'_'+d, mode='rb'))
 
-    ## jank
-    d = str(st.date_input("Select a date"))
-    st.write(d)
-    photo_posted = collection.find_one({"username": currUser, "date": d,})
-
-    if photo_posted:
-        st.write("A photo was uploaded on this day")
-        #temp = str(currUser + '_'+d)
-        view_photo = fs.open("posturepriorityawsbucket/" + currUser + '_' + d, mode='rb').read()
-        #st.image(temp)
-        st.image(view_photo)
-        ##streamlit_image_coordinates(fs.open("posturepriorityawsbucket/"+currUser+'_'+d, mode='rb'))
-
-    else:
-        st.write("No photo was uploaded on this day")
-
-
-
-
-else:
-    st.subheader("Log in or sign up to get started")
-    st.page_link("pages/Login.py", label="Log in here", icon="💾")
+        else:
+            st.write("No photo was uploaded on this day")
+    else: #not logged in
+        st.subheader("Welcome to Posture Priority!")
+        with st.container():  
+            l_col, r_col = st.columns(2)
+            with l_col: 
+                st.markdown("""
+                    We here at Posture Priority use machine learning and AI to 
+                    help generate the best exercises talyored to you personally.
+                    You can start today by signing up or loging in today!.
+                """)
+                st.page_link("pages/Login.py", label="Login\Signup in here", icon="💾")
+            with r_col:
+                st.image("images\home_page_slouch.webp")
+        
 
 #st.image(fs.open("posturepriorityawsbucket/abc123.png", mode='rb').read())
 
 #### MODEL I THINK ###
-# Initialize MediaPipe modules
 # Initialize MediaPipe modules
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
@@ -203,18 +208,9 @@ def findAngle(x1, y1, x2, y2):
     degree = int(180/m.pi)*theta
     return degree
 
-
-
-# Main Streamlit app logic
-if __name__ == "__main__":
-    # Page title and header
-    curr_date = str(date.today())
-    st.title('Posture Priority')
-    st.subheader(curr_date)
-
-    # File upload section
-    uploaded_file = st.file_uploader("Upload a photo for ")
-    if uploaded_file is not None:
+#function to run model 
+#@uploaded_file = photo uploaded in main function
+def runModel(uploaded_file): 
         image = np.array(bytearray(uploaded_file.read()), dtype=np.uint8)
         image = cv2.imdecode(image, cv2.IMREAD_COLOR)
 
@@ -228,8 +224,8 @@ if __name__ == "__main__":
         l_knee_x, l_knee_y = extract_landmark_coordinates(landmarks, img_width, img_height)
         ##st.write(f"Left knee coordinates: ({l_knee_x}, {l_knee_y})")
         
-        mp_pose = mp.solutions.pose
-        mp_drawing = mp.solutions.drawing_utils
+        #mp_pose = mp.solutions.pose
+        #mp_drawing = mp.solutions.drawing_utils
         pose = mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5, min_tracking_confidence=0.5)
         results = pose.process(image)
 
@@ -264,3 +260,14 @@ if __name__ == "__main__":
 
         # Visualize landmark coordinates on the image
         visualize_landmark_coordinates(image, l_knee_x, l_knee_y)
+
+# Main Streamlit app logic
+if __name__ == "__main__":
+    # Page title and header
+    st.title('Posture Priority')
+    
+    page_display()
+    # File upload section
+    uploaded_file = st.file_uploader("Upload a photo for (png or jpg file)", type=['png', 'jpg', 'heic', 'webp', 'avif'])
+    if uploaded_file is not None:
+        runModel(uploaded_file)
