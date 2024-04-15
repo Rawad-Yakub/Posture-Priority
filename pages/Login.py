@@ -16,6 +16,7 @@ from st_files_connection import FilesConnection
 
 import yaml
 from yaml.loader import SafeLoader
+from navigation import make_sidebar
 
 ##################################################
 
@@ -62,7 +63,7 @@ def local_css(file_name):
 ##st.markdown("Already have an account? [Login here](login)")
 
 ###
-
+make_sidebar()
 hashed_passwords = Hasher(['abc', 'def']).generate()
 
 with open('config.yaml') as file:

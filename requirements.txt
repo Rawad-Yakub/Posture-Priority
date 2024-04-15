@@ -12,5 +12,5 @@ streamlit-authenticator
 pymongo==4.6.2
 opencv-python
 mediapipe
-
+`
 s3fs
