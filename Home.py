@@ -152,8 +152,7 @@ if st.session_state["authentication_status"]:
 
 
 else:
-    st.subheader("Log in or sign up to get started")
-    st.page_link("pages/Login.py", label="Log in here", icon="💾")
+    st.page_link("pages/Login.py", label="Log in or sign up to get started!", icon="💾")
 
 #st.image(fs.open("posturepriorityawsbucket/abc123.png", mode='rb').read())
 
@@ -205,13 +204,7 @@ def findAngle(x1, y1, x2, y2):
 
 
 
-# Main Streamlit app logic
 if __name__ == "__main__":
-    # Page title and header
-    curr_date = str(date.today())
-    st.title('Posture Priority')
-    st.subheader(curr_date)
-
     # File upload section
     uploaded_file = st.file_uploader("Upload a photo for ")
     if uploaded_file is not None:
