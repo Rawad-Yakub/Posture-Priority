@@ -65,13 +65,14 @@ authenticator = stauth.Authenticate(
     config['preauthorized']
 )
 
+st.subheader("Log in or sign up to get started")
+st.page_link("Home.py", label="Home", icon="🏠")
+    
 name, authentication_status, username = authenticator.login()
 
 if st.session_state["authentication_status"]:
-    st.subheader("Log in or sign up to get started")
-    st.page_link("Home.py", label="Home", icon="🏠")
-    authenticator.logout()
     st.write(f'Welcome *{st.session_state["name"]}*')
+    authenticator.logout()
     loggedIn = True
     currUser = st.session_state["username"]
     
@@ -79,24 +80,17 @@ elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
 elif st.session_state["authentication_status"] is None:
     st.warning('Please enter your username and password')
+    
+st.page_link("pages/Manage Password.py", label="Reset Password?")
 
 #       @Registreation Widget
 ##considering putting config.yaml into s3 
-try:
-    (email_of_registered_user, username_of_registered_user, name_of_registered_user) = authenticator.register_user(pre_authorization=False)
-    if email_of_registered_user:
-        st.success('User registered successfully')
-        with open('config.yaml', 'w') as file:
-            yaml.dump(config, file, default_flow_style=False)
-except Exception as e:
-        st.error(e)
-
-
-#       @Password Reset Widget
-if st.session_state["authentication_status"] and st.button("Reset Password?"):
+if st.button("Sign up"):
     try:
-        if authenticator.reset_password(st.session_state["username"]):
-            st.success('Password modified successfully')
-            
+        (email_of_registered_user, username_of_registered_user, name_of_registered_user) = authenticator.register_user(pre_authorization=False)
+        if email_of_registered_user:
+            st.success('User registered successfully')
+            with open('config.yaml', 'w') as file:
+                yaml.dump(config, file, default_flow_style=False)
     except Exception as e:
         st.error(e)
