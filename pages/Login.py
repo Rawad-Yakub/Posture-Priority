@@ -37,15 +37,16 @@ authenticator = stauth.Authenticate(
 )
 
 ##################################################
-st.subheader("Log in or sign up to get started")
+st.subheader("Log in or sign up to get started!")
 st.page_link("Home.py", label="Home", icon="🏠")
     
 name, authentication_status, username = authenticator.login()
 
 if st.session_state["authentication_status"]:
-    st.write(f'Welcome *{st.session_state["name"]}*')
-    authenticator.logout()
-    currUser = st.session_state["username"]
+    st.write(f'Welcome, *{st.session_state["name"]}*!')
+    st.switch_page("Home.py")
+    #authenticator.logout()
+    #currUser = st.session_state["username"]
     
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')

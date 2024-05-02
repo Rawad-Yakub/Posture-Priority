@@ -32,13 +32,20 @@ authenticator = stauth.Authenticate(
     config['preauthorized']
 )
 
-st.page_link("Home.py", label="Home", icon="🏠")
-    
+st.title("My Account")
+
 #       @Password Modify Widget
 if st.session_state["authentication_status"]:
-    st.title(st.session_state["username"])
+    st.header(st.session_state["username"])
     try:
         if authenticator.reset_password(st.session_state["username"]):
             st.success('Password modified successfully')
     except Exception as e:
         st.error(e)
+    authenticator.logout()
+    
+else:
+    st.header("You're not logged in!")
+    st.page_link("pages/Login.py", label="Log in, sign up, or...", icon="💾")
+    
+st.page_link("Home.py", label="Return to Home!", icon="🏠")
