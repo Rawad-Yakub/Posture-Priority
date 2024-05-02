@@ -5,7 +5,7 @@ import datetime
 from datetime import date
 import os
 from streamlit_image_coordinates import streamlit_image_coordinates     ##manually select points for posture evaluation
-#from streamlit_image_comparison import image_comparison                 ##compare two postures
+from streamlit_image_comparison import image_comparison                 ##compare two postures
 #from streamlit_plotly_events import plotly_events                       ##interactively view data on graphs
 import streamlit_authenticator as stauth                                ##user auth. in YAML
 import numpy as np
@@ -13,10 +13,6 @@ import matplotlib.pyplot as plt           ##new
 from openai import OpenAI
 import plotly.express as px                                             
 import pandas as pd
-from PIL import Image
-import mediapipe as mp
-import math as m
-import cv2
 import pymongo
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
@@ -25,7 +21,7 @@ from st_files_connection import FilesConnection
 import yaml
 from yaml.loader import SafeLoader
 from dontcommit import my_config
-from Utilities import process_image, draw_landmarks, extract_landmark_coordinates, visualize_landmark_coordinates, findAngle
+from Utilities import process_image, draw_landmarks, extract_landmark_coordinates, visualize_landmark_coordinates, findAngle, EvalImage
 
 st.set_page_config(
     page_title="Posture Priority",
@@ -71,8 +67,7 @@ authenticator = stauth.Authenticate(
 )
 
 if st.session_state["authentication_status"]:
-    st.write(f'Welcome *{st.session_state["name"]}*')
-    loggedIn = True
+    st.write(f'Welcome, *{st.session_state["name"]}*!')
     currUser = st.session_state["username"]
     st.page_link("pages/My Account.py", label="Manage Account", icon="🏠")
     
@@ -93,55 +88,10 @@ if st.session_state["authentication_status"]:
                     collection.insert_one(post) ##.inserted_id   
                     st.write("Photo uploaded")
                     print('posturepriorityawsbucket/'+currUser+'_'+CURR_DATE+" uploaded to database")
-                
-            #image = np.array(bytearray(uploaded_file.read()), dtype=np.uint8)
-        image = cv2.imdecode(image, cv2.IMREAD_COLOR)
-
-            # Detect landmarks and draw on the image
-        landmarks = process_image(image)
-        annotated_image = draw_landmarks(image, landmarks)
-        st.image(annotated_image, channels="BGR", caption="Landmarks and Connections Detected")
-
-        # Extract and print landmark coordinates
-        img_width, img_height = image.shape[1], image.shape[0]
-        l_knee_x, l_knee_y = extract_landmark_coordinates(landmarks, img_width, img_height)
-        ##st.write(f"Left knee coordinates: ({l_knee_x}, {l_knee_y})")
+                    
+        # Detect landmarks and draw on the image
+        EvalImage(image)
         
-        mp_pose = mp.solutions.pose
-        mp_drawing = mp.solutions.drawing_utils
-        pose = mp_pose.Pose(static_image_mode=True, min_detection_confidence=0.5, min_tracking_confidence=0.5)
-        results = pose.process(image)
-
-        h, w = image.shape[:2]
-
-        # Use lm and lmPose as representative of the following methods.
-        lm = results.pose_landmarks
-        lmPose = mp_pose.PoseLandmark
-        # Left shoulder.
-        l_shldr_x = int(lm.landmark[lmPose.LEFT_SHOULDER].x * w)
-        l_shldr_y = int(lm.landmark[lmPose.LEFT_SHOULDER].y * h)
-
-        # Right shoulder.
-        r_shldr_x = int(lm.landmark[lmPose.RIGHT_SHOULDER].x * w)
-        r_shldr_y = int(lm.landmark[lmPose.RIGHT_SHOULDER].y * h)
-
-        # Left ear.
-        l_ear_x = int(lm.landmark[lmPose.LEFT_EAR].x * w)
-        l_ear_y = int(lm.landmark[lmPose.LEFT_EAR].y * h)
-
-        # Left hip.
-        l_hip_x = int(lm.landmark[lmPose.LEFT_HIP].x * w)
-        l_hip_y = int(lm.landmark[lmPose.LEFT_HIP].y * h)
-        neck_inclination = findAngle(l_shldr_x, l_shldr_y, l_ear_x, l_ear_y)
-        torso_inclination = findAngle(l_hip_x, l_hip_y, l_shldr_x, l_shldr_y)
-
-        if neck_inclination > 40 or neck_inclination > 10:
-            st.write("bad posture")
-        else:
-            st.write("good")
-
-        # Visualize landmark coordinates on the image
-        visualize_landmark_coordinates(image, l_knee_x, l_knee_y)
     ##activeDates = fs.open("posturepriorityawsbucket/"+currUser, mode='rb').read()
 
     #Generate a response from ChatGPT using the question chat message
@@ -161,7 +111,6 @@ if st.session_state["authentication_status"]:
 
     #st.write(str(answer))
 
-
 ###############################################################################
     st.subheader("Or, view an existing photo")
     ## jank
@@ -176,8 +125,17 @@ if st.session_state["authentication_status"]:
     if photo_posted:
         st.write("A photo was uploaded on this day")
         view_photo = fs.open("posturepriorityawsbucket/" + currUser + '_' + d, mode='rb').read()
-        st.image(view_photo)
+        #st.image(view_photo)
+        image = np.array(bytearray(view_photo), dtype=np.uint8)
+        EvalImage(image)
     else:
         st.write("No photo was uploaded on this day")
 else:
-    st.page_link("pages/Login.py", label="Log in or sign up to get started!", icon="💾")
+    st.header("Try below!")
+    
+    uploaded_file = st.file_uploader("Upload a photo?")
+    if uploaded_file is not None:
+        image = np.array(bytearray(uploaded_file.read()), dtype=np.uint8)     
+        EvalImage(image)
+        
+    st.page_link("pages/Login.py", label="Log in or sign up", icon="💾")
