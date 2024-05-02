@@ -4,8 +4,9 @@ import streamlit as st ##1.12.0 originally
 import datetime
 from datetime import date
 import os
-from streamlit_image_coordinates import streamlit_image_coordinates     ##manually select points for posture evaluation
-from streamlit_image_comparison import image_comparison                 ##compare two postures
+from streamlit_calendar import calendar
+#from streamlit_image_coordinates import streamlit_image_coordinates     ##manually select points for posture evaluation
+#from streamlit_image_comparison import image_comparison                 ##compare two postures
 #from streamlit_plotly_events import plotly_events                       ##interactively view data on graphs
 import streamlit_authenticator as stauth                                ##user auth. in YAML
 import numpy as np
@@ -113,13 +114,34 @@ if st.session_state["authentication_status"]:
 
 ###############################################################################
     st.subheader("Or, view an existing photo")
-    ## jank
+    ##Find photos for month    
     d = str(st.date_input("Select a date"))
     st.write("Viewing: " + d)
-    #for i in range(31):
-        
+    
+    #Checking uploaded days
+    uploaded_days_list = ""
+    CurrYearmonth = d[:8] # YYYY-MM-"0D"
+    CurrDay = 1           #  D,       ^
+    ZeroConst = str("0")  #  0,      ^
+    while CurrDay < 10:
+        PrevPosted = collection.find_one({"username": currUser, "date": CurrYearmonth+ZeroConst+str(CurrDay)})
+        if PrevPosted:
+            uploaded_days_list =  uploaded_days_list+ str(CurrDay) + ", "
+        CurrDay += 1
+    
+    while CurrDay < 32:
+        PrevPosted = collection.find_one({"username": currUser, "date": CurrYearmonth+str(CurrDay)})
+        if PrevPosted:
+            uploaded_days_list = uploaded_days_list + str(CurrDay) + ", "
+        CurrDay += 1
+    
+    if uploaded_days_list == "":
+        st.write("Nothing was uploaded this month")
+    else:
+        st.write("Dates uploaded for current month: " + uploaded_days_list)
+      
+    
     photo_posted = collection.find_one({"username": currUser, "date": d,})
-
     collection.find()
 
     if photo_posted:
