@@ -8,9 +8,10 @@ streamlit-image-comparison
 streamlit-image-coordinates
 streamlit-plotly-events
 streamlit-authenticator
+streamlit_calendar
 
 pymongo==4.6.2
 opencv-python
 mediapipe
-`
+
 s3fs

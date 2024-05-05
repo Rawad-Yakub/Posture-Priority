@@ -41,7 +41,7 @@ from navigation import make_sidebar
 st.set_page_config(
     page_title="Posture Priority",
     page_icon="🚶",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state='auto'
 )
 make_sidebar()

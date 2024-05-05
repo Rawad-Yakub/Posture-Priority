@@ -34,8 +34,8 @@ from dontcommit import my_config
 from navigation import make_sidebar
 
 
+st.set_page_config(page_title="Posture Priority", layout='wide',initial_sidebar_state='collapsed',)
 make_sidebar()
-
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 
@@ -137,6 +137,15 @@ if __name__ == "__main__":
 
     # Page title and header
     st.title('Exercise Generation')
-    uploaded_file = st.file_uploader("Upload a photo for (png or jpg file)", type=['png', 'jpg', 'heic', 'webp', 'avif'])
-    if uploaded_file is not None:
-        runModel(uploaded_file)
+    with st.container():
+        l_col, r_col = st.columns(2)
+        with l_col:
+            st.markdown("With the link bellow, upload a photo from your device to generate your personalized exercise")
+            uploaded_file = st.file_uploader("Upload a photo for (png or jpg file)", type=['png', 'jpg', 'heic', 'webp', 'avif'])
+            if uploaded_file is not None:
+                #st.empty()  # Clear previous text
+                runModel(uploaded_file)
+                st.page_link("pages/Login.py", label="Want to save your photos? Login/Sign up", icon="💾")
+        with r_col:
+            st.markdown("Photo will be shown here}")
+        #formatted_date = datetime_obj.strftime("%Y-%m-%d")
