@@ -8,6 +8,7 @@ import s3fs
 from st_files_connection import FilesConnection
 import yaml
 from yaml.loader import SafeLoader
+from dontcommit import my_config
 
 ##################################################
 st.set_page_config(
@@ -25,7 +26,10 @@ def local_css(file_name):
 #local_css("signup_style.css")  # Update file name here
 hashed_passwords = Hasher(['abc', 'def']).generate()
 
-with open('config.yaml') as file:
+username, password, s3_key, s3_secret, GPT_key = my_config()
+fs = s3fs.S3FileSystem(anon=False, key=s3_key, secret=s3_secret)        ##init s3 filesystem
+
+with fs.open('posturepriorityawsbucket/'+"config.yaml", 'rb') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
 authenticator = stauth.Authenticate(
@@ -53,18 +57,6 @@ elif st.session_state["authentication_status"] is False:
 elif st.session_state["authentication_status"] is None:
     st.warning('Please enter your username and password')
     
-    
-#       @Registration Widget
-######################################
-if not st.session_state["authentication_status"]:
-    if st.button("Sign up"):
-        try:
-            (email_of_registered_user, username_of_registered_user, name_of_registered_user) = authenticator.register_user(pre_authorization=False)
-            if email_of_registered_user:
-                st.success('User registered successfully')
-                with open('config.yaml', 'w') as file:
-                    yaml.dump(config, file, default_flow_style=False)
-        except Exception as e:
-            st.error(e)
-    
+  
 st.page_link("pages/My Account.py", label="Reset Password?")
+st.page_link("pages/Registration.py", label="Register an Account")

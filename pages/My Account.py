@@ -8,8 +8,7 @@ import s3fs
 from st_files_connection import FilesConnection
 import yaml
 from yaml.loader import SafeLoader
-
-
+from dontcommit import my_config
 ##################################################
 st.set_page_config(
     page_title="Reset Password",
@@ -20,8 +19,10 @@ st.set_page_config(
 ##################################################
 
 #hashed_passwords = Hasher(['abc', 'def']).generate()
+username, password, s3_key, s3_secret, GPT_key = my_config()
+fs = s3fs.S3FileSystem(anon=False, key=s3_key, secret=s3_secret)        ##init s3 filesystem
 
-with open('config.yaml') as file:
+with fs.open('posturepriorityawsbucket/config.yaml', 'rb') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
 authenticator = stauth.Authenticate(
@@ -31,6 +32,7 @@ authenticator = stauth.Authenticate(
     config['cookie']['expiry_days'],
     config['preauthorized']
 )
+
 
 st.title("My Account")
 
