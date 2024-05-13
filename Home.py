@@ -23,6 +23,7 @@ import yaml
 from yaml.loader import SafeLoader
 from dontcommit import my_config
 from Utilities import process_image, draw_landmarks, extract_landmark_coordinates, visualize_landmark_coordinates, findAngle, EvalImage
+from Calendar import makeCalendar, photoRequest
 
 st.set_page_config(
     page_title="Posture Priority",
@@ -55,9 +56,11 @@ collection = db['test_PP']
 fs = s3fs.S3FileSystem(anon=False, key=s3_key, secret=s3_secret)        ##init s3 filesystem
 GPT_Client = OpenAI(api_key=GPT_key)
 ##################################################
-#this is gonna be in cloud or db for end product 
-with open('config.yaml') as file:
+with fs.open('posturepriorityawsbucket/'+"config.yaml", 'rb') as file:
     config = yaml.load(file, Loader=SafeLoader)
+
+#with open('config.yaml') as file:
+#    config = yaml.load(file, Loader=SafeLoader)
 
 authenticator = stauth.Authenticate(
     config['credentials'],
@@ -116,21 +119,104 @@ if st.session_state["authentication_status"]:
     st.subheader("Or, view an existing photo")
     ##Find photos for month    
     d = str(st.date_input("Select a date"))
+
+
+
+
+    #Checking uploaded days
+    dateList = []
+    CurrYear = d[:4]
+    CurrMonth = 12
+
+    CurrYearMonth = d[:8] # YYYY-MM-"0D"
+    CurrDay = 31          
+    ZeroConst = str("0")  #  0,      ^
+
+
+    StartYear = 2024
+    StartMonth = 2
+    StartDate = 1            #Beginning of DB
+
+    #Calendar filling out, buggy.
+    ####while(int(CurrYear) >= StartYear ):
+    ####    while StartDate < 32:
+    ####        if(StartDate<10 and StartMonth<10):
+    ####            PrevPosted = collection.find_one({"username": currUser, "date": str(StartYear)+'-'+ZeroConst+str(StartMonth)+'-'+ZeroConst+str(StartDate)})
+    ####            if PrevPosted:
+    ####                dateList.append(str(StartYear)+'-'+ZeroConst+str(StartMonth)+'-'+ZeroConst+str(StartDate))
+    ####        elif(StartDate>=10 and StartMonth<10):
+    ####            PrevPosted = collection.find_one({"username": currUser, "date": str(StartYear)+'-'+ZeroConst+str(StartMonth)+'-'+str(StartDate)})
+    ####            if PrevPosted:
+    ####                dateList.append(str(StartYear)+'-'+ZeroConst+str(StartMonth)+'-'+str(StartDate))
+    ####        elif(StartDate<10 and StartMonth>=10):
+    ####            PrevPosted = collection.find_one({"username": currUser, "date": str(StartYear)+'-'+str(StartMonth)+'-'+ZeroConst+str(StartDate)})
+    ####            if PrevPosted:
+    ####                dateList.append(str(StartYear)+'-'+str(StartMonth)+'-'+ZeroConst+str(StartDate))
+    ####        else:
+    ####            PrevPosted = collection.find_one({"username": currUser, "date": str(StartYear)+'-'+str(StartMonth)+'-'+str(StartDate)})
+    ####            if PrevPosted:
+    ####                dateList.append(str(StartYear)+'-'+str(StartMonth)+'-'+str(StartDate))
+    ####        print(StartYear, StartMonth, StartDate)
+    ####        StartDate += 1
+    ####        
+####
+    ####    StartMonth+=1
+    ####    StartDate = 1 
+    ####    if(StartMonth > 12):
+    ####        StartMonth = 1
+    ####    
+    ####    if(StartMonth == 12 and StartDate==31):
+    ####        StartYear+=1
+    ####        StartMonth = 1
+    ####        StartDate = 1
+
+
+
+
+    while CurrDay < 10:
+        PrevPosted = collection.find_one({"username": currUser, "date": CurrYearMonth+ZeroConst+str(CurrDay)})
+        if PrevPosted:
+            dateList.append(CurrYearMonth+ZeroConst+str(CurrDay))
+        CurrDay += 1
+    while CurrDay < 32:
+        PrevPosted = collection.find_one({"username": currUser, "date": CurrYearMonth+str(CurrDay)})
+        if PrevPosted:
+            dateList.append(CurrYearMonth+str(CurrDay))
+        CurrDay += 1
+    
+    calendar = makeCalendar(dateList)
+    
+    #click event, should bring up photo
+    if calendar.get("callback") == "eventClick":
+        date = calendar["eventClick"]["event"]["start"]
+        #photoRequest(date=date, photoTaken= date in dateList)
+    elif calendar.get("callback") == "dateClick":
+        date = calendar["dateClick"]["date"].split('T')[0]
+        #photoRequest(date=date, photoTaken= date in dateList)
+    st.write(dateList)
+
+
+
+
+
+
+
+
     st.write("Viewing: " + d)
     
     #Checking uploaded days
     uploaded_days_list = ""
-    CurrYearmonth = d[:8] # YYYY-MM-"0D"
+    CurrYearMonth = d[:8] # YYYY-MM-"0D"
     CurrDay = 1           #  D,       ^
     ZeroConst = str("0")  #  0,      ^
     while CurrDay < 10:
-        PrevPosted = collection.find_one({"username": currUser, "date": CurrYearmonth+ZeroConst+str(CurrDay)})
+        PrevPosted = collection.find_one({"username": currUser, "date": CurrYearMonth+ZeroConst+str(CurrDay)})
         if PrevPosted:
             uploaded_days_list =  uploaded_days_list+ str(CurrDay) + ", "
         CurrDay += 1
     
     while CurrDay < 32:
-        PrevPosted = collection.find_one({"username": currUser, "date": CurrYearmonth+str(CurrDay)})
+        PrevPosted = collection.find_one({"username": currUser, "date": CurrYearMonth+str(CurrDay)})
         if PrevPosted:
             uploaded_days_list = uploaded_days_list + str(CurrDay) + ", "
         CurrDay += 1
