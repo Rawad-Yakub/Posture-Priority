@@ -95,3 +95,4 @@ def EvalImage(image):
             st.write("Your posture is good")
     
     visualize_landmark_coordinates(image, l_knee_x, l_knee_y)
+    return neck_inclination, torso_inclination

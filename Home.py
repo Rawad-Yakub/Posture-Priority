@@ -99,21 +99,6 @@ if st.session_state["authentication_status"]:
     ##activeDates = fs.open("posturepriorityawsbucket/"+currUser, mode='rb').read()
 
     #Generate a response from ChatGPT using the question chat message
-    #question = "What are some exercises or stretches to improve " + my_Posture + "?"
-    #st.write(question)
-    #response = GPT_Client.chat.completions.create(model = "gpt-3.5-turbo",
-    #messages = [
-    #    {"role": "user", "content": question}
-    #],
-    #max_tokens=100,
-    #temperature=0.9,
-    #frequency_penalty=0.5,
-    #presence_penalty=0.5)
-
-    #Extract the answer from the response
-    #answer = response.choices[0].message.content
-
-    #st.write(str(answer))
 
 ###############################################################################
     st.subheader("Or, view an existing photo")
@@ -210,8 +195,7 @@ if st.session_state["authentication_status"]:
     ###if uploaded_days_list == "":
     ###    st.write("Nothing was uploaded this month")
     ###else:
-    ###    st.write("Dates uploaded for current month: " + uploaded_days_list)
-      
+    ###    st.write("Dates uploaded for current month: " + uploaded_days_list)  
     
     photo_posted = collection.find_one({"username": currUser, "date": d,})
     collection.find()
@@ -221,7 +205,21 @@ if st.session_state["authentication_status"]:
         view_photo = fs.open("posturepriorityawsbucket/" + currUser + '_' + d, mode='rb').read()
         #st.image(view_photo)
         image = np.array(bytearray(view_photo), dtype=np.uint8)
-        EvalImage(image)
+        neck, torso = EvalImage(image)
+        question = "What are some exercises or stretches to improve posture with a neck angle of " + str(neck) +  "and a torso inclination angle of " + str(torso) + "?" + "Briefly describe the posture as well."
+        response = GPT_Client.chat.completions.create(model = "gpt-3.5-turbo",
+        messages = [
+            {"role": "user", "content": question}
+        ],
+        max_tokens=180,
+        temperature=0.9,
+        frequency_penalty=0.5,
+        presence_penalty=0.5)
+
+        #Extract the answer from the response
+        answer = response.choices[0].message.content
+
+        st.write(str(answer))
     else:
         st.write("No photo was uploaded on this day")
 else:
