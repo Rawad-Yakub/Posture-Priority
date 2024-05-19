@@ -8,17 +8,18 @@ import s3fs
 from st_files_connection import FilesConnection
 import yaml
 from yaml.loader import SafeLoader
-from navigation import make_sidebar
+from dontcommit import my_config
+from navigation import make_navbar
 
 ##################################################
 st.set_page_config(
     page_title="Login",
     page_icon="🚶",
-    layout="wide",
+    layout="centered",
     initial_sidebar_state='auto'
 )
-make_sidebar()
 
+make_navbar()
 # Define CSS styles
 def local_css(file_name):
     with open(file_name) as f:
@@ -27,7 +28,10 @@ def local_css(file_name):
 #local_css("signup_style.css")  # Update file name here
 hashed_passwords = Hasher(['abc', 'def']).generate()
 
-with open('config.yaml') as file:
+username, password, s3_key, s3_secret = my_config() #removed GPT_Key
+fs = s3fs.S3FileSystem(anon=False, key=s3_key, secret=s3_secret)        ##init s3 filesystem
+
+with fs.open('posturepriorityawsbucket/'+"config.yaml", 'rb') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
 authenticator = stauth.Authenticate(
@@ -39,33 +43,21 @@ authenticator = stauth.Authenticate(
 )
 
 ##################################################
-st.subheader("Log in or sign up to get started")
-st.page_link("Home.py", label="Home", icon="🏠")
+st.subheader("Log in or sign up to get started!")
     
 name, authentication_status, username = authenticator.login()
 
 if st.session_state["authentication_status"]:
-    st.write(f'Welcome *{st.session_state["name"]}*')
-    authenticator.logout()
-    currUser = st.session_state["username"]
+    st.write(f'Welcome, *{st.session_state["name"]}*!')
+    st.switch_page("Home.py")
+    #authenticator.logout()
+    #currUser = st.session_state["username"]
     
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
 elif st.session_state["authentication_status"] is None:
     st.warning('Please enter your username and password')
     
-    
-#       @Registration Widget
-######################################
-if not st.session_state["authentication_status"]:
-    if st.button("Sign up"):
-        try:
-            (email_of_registered_user, username_of_registered_user, name_of_registered_user) = authenticator.register_user(pre_authorization=False)
-            if email_of_registered_user:
-                st.success('User registered successfully')
-                with open('config.yaml', 'w') as file:
-                    yaml.dump(config, file, default_flow_style=False)
-        except Exception as e:
-            st.error(e)
-    
+  
 st.page_link("pages/My Account.py", label="Reset Password?")
+st.page_link("pages/Registration.py", label="Register an Account")

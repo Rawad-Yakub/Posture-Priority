@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fading Image with Text</title>
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        background-color: #0D0548;
+    }
+
+    .first-p {
+        margin: 0 0 1rem; /* Margin shorthand: top 0, right 0, bottom 1rem, left 0 */
+        font-size: 3.5rem;
+    }
+
+    .other-p {
+        margin: 0 0 0.4rem; /* Reset margin to default (0) */
+        font-size: 2rem;
+    }
+
+    .container {
+        display: flex;
+        width: 80%; /* Adjust as needed */
+        height: 70vh; /* Adjust as needed */
+        overflow: hidden;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        position: relative;
+    }
+
+    .image {
+        width: 70%;
+        height: 100%;
+        background-image: url('../images/office.webp'); /* Replace with your base64 string */
+        background-size: cover;
+        background-position: center;
+        position: relative;
+    }
+
+    .fade-effect {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0), #0D0548);
+    }
+
+    .text {
+        width: 30%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
+        background-color: #0D0548;
+        color: white;
+        text-align: center; /* Centers text horizontally */
+        font-size: 2rem;
+        position: relative;
+    }
+
+    .additional-text {
+        font-size: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .button-container {
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .button-container button {
+        background-color: #0D0548;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 1rem;
+        border-radius: 5px;
+    }
+
+    .button-container button:hover {
+        background-color: #ddd;
+        color: black;
+    }
+</style>
+</head>
+<body>
+    <div class="container">
+        <div class="image">
+            <div class="fade-effect"></div>
+        </div>
+        <div class="text">
+            <p class="first-p"><i>Posture</i> <strong>Priority</strong></p>
+            <p class="other-p">Your Posture,</p>
+            <p class="other-p">Our Priority</p>
+            <div class="button-container">
+                <button id="action-button">Click Me</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Function to update the dynamic text
+        function updateDynamicText(text) {
+            document.getElementById('dynamic-text').innerText = text;
+        }
+
+        // Function to send message to Streamlit
+        function sendMessageToStreamlitClient(type, data) {
+            var outData = Object.assign({
+                isStreamlitMessage: true,
+                type: type,
+            }, data);
+            window.parent.postMessage(outData, "*");
+        }
+
+        // Initialize the Streamlit component
+        function init() {
+            sendMessageToStreamlitClient("streamlit:componentReady", {apiVersion: 1});
+        }
+
+        // Function to send data to Python
+        function sendDataToPython(data) {
+            sendMessageToStreamlitClient("streamlit:setComponentValue", data);
+        }
+
+        // Event listener for the button
+        document.getElementById('action-button').addEventListener('click', function() {
+            var message = 'Button was clicked!';
+            var value = 'button_click';
+            sendDataToPython({
+                value: value,
+                message: message,
+                dataType: "json",
+            });
+        });
+
+        // Handle data sent from Python
+        function onDataFromPython(event) {
+            if (event.data.type !== "streamlit:render") return;
+
+            var text = event.data.args.text;  // Access dynamic text sent from Python
+            var bodyColor = event.data.args.body_color;  // Access body color sent from Python
+
+            // Set dynamic text
+            updateDynamicText(text);
+
+            // Set body background color
+            document.documentElement.style.setProperty("--body-background-color", bodyColor);
+        }
+
+        window.addEventListener("message", onDataFromPython);
+        init();
+    </script>
+</body>
+</html>

@@ -35,8 +35,7 @@ import yaml
 from yaml.loader import SafeLoader
 from dontcommit import my_config
 
-from navigation import make_sidebar
-
+from navigation import make_navbar, set_padding
 
 st.set_page_config(
     page_title="Posture Priority",
@@ -44,7 +43,10 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state='auto'
 )
-make_sidebar()
+if 'authentication_status' not in st.session_state:
+    st.session_state['authentication_status'] = None
+make_navbar()
+set_padding()
 CURR_DATE = str(date.today())
  
 username, password, s3_key, s3_secret = my_config() #commented ', GPT_key' out to test
@@ -61,11 +63,11 @@ client = MongoClient(init_connection(), server_api=ServerApi('1'))
 
 # Send a ping to confirm a successful connection  
 try:
-    client.admin.command('ping')
+    client.admin.command('ping', maxTimeMS=4000)
     print("Pinged your deployment. You successfully connected to MongoDB!")
 except Exception as e:
     print(e)
-    st.write("Connection to database failed. Invalid credentials")
+    #st.write("Connection to database failed. Invalid credentials")
 
 db = client.test_database
 collection = db['test_PP']
@@ -177,11 +179,13 @@ def page_display():
 
 # Main Streamlit app logic
 if __name__ == "__main__":
-    
+    ##st.page_link()
     # Page title and header
-    st.title('Posture Priority')
-    
-    page_display()
+    with open('styles\homepage.html','r') as f: 
+        html_data = f.read()
+
+    st.markdown(html_data, unsafe_allow_html=True)
     #connect_database()
     # File upload section
-    uploaded_file = st.file_uploader("Upload a photo for (png or jpg file)", type=['png', 'jpg', 'heic', 'webp', 'avif'])
+    #uploaded_file = st.file_uploader("Upload a photo for (png or jpg file)", type=['png', 'jpg', 'heic', 'webp', 'avif'])
+    

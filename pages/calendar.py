@@ -34,13 +34,14 @@ from dontcommit import my_config
 import hydralit_components as hc
 from time import sleep
 from streamlit_calendar import calendar
-from navigation import make_sidebar
+from navigation import make_sidebar, set_padding
 from datetime import datetime, timedelta
-
+from navigation import make_navbar, set_padding
 
 
 st.set_page_config(page_title="Posture Priority", layout='wide',initial_sidebar_state='collapsed',)
-make_sidebar()
+set_padding()
+make_navbar()
 
 #creates the calendar and returns it
 def makeCalendar(dateList):
@@ -57,8 +58,8 @@ def makeCalendar(dateList):
     calendar_events = createEvents(dateList)
     custom_css="""
         .fc {
-            width: 30%; /* Change this value to adjust the width */
-            height: 60%; /* Change this value to adjust the height */
+            width: 45%; /* Change this value to adjust the width */
+            height: 70%; /* Change this value to adjust the height */
             background: black;
             border: 1px white
             border radius: 20px
@@ -129,8 +130,9 @@ def photoRequest(date, photoTaken):
 
 if __name__ == "__main__":
     dateList= ['2024-04-24', '2024-04-25', '2024-04-26', '2024-04-27', '2024-04-28', '2024-05-05', '2024-05-06', '2024-05-07', '2024-05-08', '2024-05-09', '2024-05-16', '2024-05-17', '2024-05-18', '2024-05-19', '2024-05-20']
+    st.markdown("<h2>Click on a valid date to get photo</h2>", unsafe_allow_html=True)
     calendar = makeCalendar(dateList)
-    st.write(calendar)
+    #st.write(calendar)
     #click event, should bring up photo
     if calendar.get("callback") == "eventClick":
         date = calendar["eventClick"]["event"]["start"]

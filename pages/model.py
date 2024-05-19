@@ -31,11 +31,12 @@ import yaml
 from yaml.loader import SafeLoader
 from dontcommit import my_config
 
-from navigation import make_sidebar
+from navigation import make_navbar, set_padding
 
 
 st.set_page_config(page_title="Posture Priority", layout='wide',initial_sidebar_state='collapsed',)
-make_sidebar()
+make_navbar()
+set_padding()
 mp_pose = mp.solutions.pose
 mp_drawing = mp.solutions.drawing_utils
 
@@ -136,11 +137,12 @@ def runModel(uploaded_file):
 if __name__ == "__main__":
 
     # Page title and header
-    st.title('Exercise Generation')
+
+    st.markdown("<h1 style='text-align: center;'>Exercise Generation</h1>", unsafe_allow_html=True)
     with st.container():
         l_col, r_col = st.columns(2)
         with l_col:
-            st.markdown("With the link bellow, upload a photo from your device to generate your personalized exercise")
+            st.markdown("With the link bellow, upload a photo from your device to generate your personalized exercise",unsafe_allow_html=True)
             uploaded_file = st.file_uploader("Upload a photo for (png or jpg file)", type=['png', 'jpg', 'heic', 'webp', 'avif'])
             if uploaded_file is not None:
                 #st.empty()  # Clear previous text

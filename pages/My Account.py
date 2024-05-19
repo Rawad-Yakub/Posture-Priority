@@ -8,7 +8,7 @@ import s3fs
 from st_files_connection import FilesConnection
 import yaml
 from yaml.loader import SafeLoader
-
+from navigation import make_sidebar, set_padding
 
 ##################################################
 st.set_page_config(
@@ -18,6 +18,8 @@ st.set_page_config(
     initial_sidebar_state='auto'
 )
 make_sidebar()
+set_padding()
+
 ##################################################
 
 #hashed_passwords = Hasher(['abc', 'def']).generate()
