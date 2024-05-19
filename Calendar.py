@@ -44,12 +44,12 @@ def makeCalendar(dateList):
     calendar_events = createEvents(dateList)
     custom_css="""
         .fc {
-            width: 30%; /* Change this value to adjust the width */
-            height: 60%; /* Change this value to adjust the height */
+            width: 40%; /* Change this value to adjust the width */
+            height: 40%; /* Change this value to adjust the height */
             background: black;
             border: 1px white
             border radius: 20px
-            padding: 20px 20px  
+            padding: 10px 10px  
         }
         .fc-event-past {
             opacity: 0.8;
