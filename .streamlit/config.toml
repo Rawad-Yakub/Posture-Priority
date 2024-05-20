@@ -3,6 +3,6 @@ showSidebarNavigation = false
 
 [theme]
 font = "sans serif"
-backgroundColor= "#0D0548"
-secondaryBackgroundColor= "#2510D1"
+backgroundColor= "#252526"
+secondaryBackgroundColor= "#252374"
 textColor = "white"

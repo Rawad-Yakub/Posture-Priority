@@ -34,7 +34,6 @@ from dontcommit import my_config
 import hydralit_components as hc
 from time import sleep
 from streamlit_calendar import calendar
-from navigation import make_sidebar, set_padding
 from datetime import datetime, timedelta
 from navigation import make_navbar, set_padding
 

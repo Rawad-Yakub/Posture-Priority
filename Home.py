@@ -62,12 +62,12 @@ global fs, client, collection, db, authenticator, config
 client = MongoClient(init_connection(), server_api=ServerApi('1')) 
 
 # Send a ping to confirm a successful connection  
-try:
-    client.admin.command('ping', maxTimeMS=4000)
-    print("Pinged your deployment. You successfully connected to MongoDB!")
-except Exception as e:
-    print(e)
-    #st.write("Connection to database failed. Invalid credentials")
+#try:
+#    client.admin.command('ping', maxTimeMS=4000)
+#    print("Pinged your deployment. You successfully connected to MongoDB!")
+#except Exception as e:
+#    print(e)
+#    #st.write("Connection to database failed. Invalid credentials")
 
 db = client.test_database
 collection = db['test_PP']

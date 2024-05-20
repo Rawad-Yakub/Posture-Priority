@@ -10,28 +10,37 @@
         padding: 0;
         font-family: Arial, sans-serif;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         height: 100vh;
-        background-color: #0D0548;
+        background-color: #72A857;
     }
 
     .first-p {
-        margin: 0 0 1rem; /* Margin shorthand: top 0, right 0, bottom 1rem, left 0 */
-        font-size: 3.5rem;
+        margin: 0 0 1rem;
+        font-size: 3rem;
     }
 
     .other-p {
-        margin: 0 0 0.4rem; /* Reset margin to default (0) */
+        margin: 0 0 0.4rem;
         font-size: 2rem;
     }
 
     .container {
         display: flex;
-        width: 100%; /* Adjust as needed */
-        height: 70vh; /* Adjust as needed */
+        flex-direction: column;
+        width: 100%; 
+        height: auto;
         overflow: hidden;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.1);
+        background-color: #252526; 
+    }
+
+    .image-text-container {
+        display: flex;
+        width: 100%;
+        height: 70vh;
     }
 
     .image {
@@ -47,20 +56,9 @@
         width: 100%;
         height: 100%;
         position: absolute;
-        background: linear-gradient(to right, rgba(255, 255, 255, 0), #0D0548);
+        background: linear-gradient(to left, rgba(255, 255, 255, 0), #525253);
     }
-    .header {
-        width: 30%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-        box-sizing: border-box;
-        background-color: #0D0548;
-        text-align: center; /* Centers text horizontally */
-    }
+
     .text {
         width: 30%;
         height: 100%;
@@ -70,22 +68,109 @@
         align-items: center;
         padding: 20px;
         box-sizing: border-box;
-        background-color: #0D0548;
         color: white;
-        text-align: center; /* Centers text horizontally */
+        text-align: center;
         font-size: 2rem;
+        background: linear-gradient(to left, #525253, #252526);
+    }
+
+    .columns {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        border-bottom-left-radius: 20px;
+        border-bottom-right-radius: 20px;
+        border-left: 2px solid white;
+        border-right: 2px solid white;
+        border-bottom: 2px solid white;
+        box-sizing: border-box;
+        margin-bottom: 20px; 
+        padding-bottom: 20px;
+        background: #606EA0;
+    }
+
+    .column-header {
+        color: white;
+        padding: 20px 0;
+        margin: 0;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        border-top: 2px solid white;
+        border-right: 2px solid white;
+        border-left: 2px solid white;
+        background: #545F8C;
+        text-align: center;
+    }
+
+    .column {
+        width: 30%;
+        padding: 20px 20px 20px;
+        box-sizing: border-box;
+        background: #606EA0;
+        color: white;
+        text-align: center;
+        border: 2px solid white;
+        justify-content: space-around;
+        border-radius: 10px;
+        padding: 20px 0;
+    }
+
+    .column h3 {
+        margin-top: 0;
+    }
+
+    .column ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .column ul li {
+        margin: 0.5rem 0;
+        font-size: 1.25rem;
+    }
+
+    .spacer {
+        width: 100%;
+        height: 40px; 
+        background-color: #252526;
     }
 </style>
 </head>
 <body>
     <div class="container">
-        <div class="image">
-            <div class="fade-effect"></div>
+        <div class="image-text-container">
+            <div class="text">
+                <p class="first-p">Your Posture, Our Priority</p>
+                <p class="other-p">,</p>
+                <p class="other-p"></p>
+            </div>
+            <div class="image">
+                <div class="fade-effect"></div>
+            </div>
         </div>
-        <div class="text">
-            <p class="first-p"><i>Posture</i> <strong>Priority</strong></p>
-            <p class="other-p">Your Posture,</p>
-            <p class="other-p">Our Priority</p>
+        <div class="spacer"></div>
+        <div class="column-header">
+            <h2>Why Posture Priority?</h2>
+        </div> 
+        <div class="columns">
+            <div class="column">
+                <h3>Personalized Generated Exercises</h3>
+                <ul>
+                    <li>Our Chat-GPT powered AI generates an exercise based on your photos</li>
+                </ul>
+            </div>
+            <div class="column">
+                <h3>Track Your Progress</h3>
+                <ul>
+                    <li>Sign in and see your progress from your uploads!</li>
+                </ul>
+            </div>
+            <div class="column">
+                <h3>Easy to Use</h3>
+                <ul>
+                    <li>Upload a photo today and get results fast</li>
+                </ul>
+            </div>
         </div>
     </div>
 </body>
