@@ -6,7 +6,10 @@ from st_files_connection import FilesConnection
 import yaml
 from yaml.loader import SafeLoader
 from dontcommit import my_config
+from navigation import make_navbar, set_padding
 
+make_navbar()
+set_padding()
 hashed_passwords = Hasher(['abc', 'def']).generate()
 username, password, s3_key, s3_secret, GPT_key = my_config()
 fs = s3fs.S3FileSystem(anon=False, key=s3_key, secret=s3_secret)        ##init s3 filesystem

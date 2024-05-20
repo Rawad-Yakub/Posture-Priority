@@ -9,16 +9,17 @@ from st_files_connection import FilesConnection
 import yaml
 from yaml.loader import SafeLoader
 from dontcommit import my_config
+from navigation import make_navbar, set_padding
 ##################################################
 st.set_page_config(
     page_title="Reset Password",
     page_icon="🚶",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state='auto'
 )
+make_navbar()
+set_padding()
 ##################################################
-
-#hashed_passwords = Hasher(['abc', 'def']).generate()
 username, password, s3_key, s3_secret, GPT_key = my_config()
 fs = s3fs.S3FileSystem(anon=False, key=s3_key, secret=s3_secret)        ##init s3 filesystem
 
@@ -33,10 +34,9 @@ authenticator = stauth.Authenticate(
     config['preauthorized']
 )
 
-
 st.title("My Account")
 
-#       @Password Modify Widget
+#Password Modify Widget
 if st.session_state["authentication_status"]:
     st.header(st.session_state["username"])
     try:
@@ -45,9 +45,9 @@ if st.session_state["authentication_status"]:
     except Exception as e:
         st.error(e)
     authenticator.logout()
-    
+    st.switch_page("pages/Home.py")
 else:
     st.header("You're not logged in!")
     st.page_link("pages/Login.py", label="Log in, sign up, or...", icon="💾")
     
-st.page_link("Home.py", label="Return to Home!", icon="🏠")
+st.page_link("pages/Home.py", label="Return to Home!", icon="🏠")

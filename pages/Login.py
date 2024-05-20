@@ -9,20 +9,16 @@ from st_files_connection import FilesConnection
 import yaml
 from yaml.loader import SafeLoader
 from dontcommit import my_config
-
+from navigation import make_navbar, set_padding
 ##################################################
 st.set_page_config(
     page_title="Login",
     page_icon="🚶",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state='auto'
 )
-
-# Define CSS styles
-def local_css(file_name):
-    with open(file_name) as f:
-        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
-
+make_navbar()
+set_padding()
 #local_css("signup_style.css")  # Update file name here
 hashed_passwords = Hasher(['abc', 'def']).generate()
 
@@ -42,21 +38,18 @@ authenticator = stauth.Authenticate(
 
 ##################################################
 st.subheader("Log in or sign up to get started!")
-st.page_link("Home.py", label="Home", icon="🏠")
+st.page_link("pages/Home.py", label="Home", icon="🏠")
     
 name, authentication_status, username = authenticator.login()
 
 if st.session_state["authentication_status"]:
     st.write(f'Welcome, *{st.session_state["name"]}*!')
-    st.switch_page("Home.py")
-    #authenticator.logout()
-    #currUser = st.session_state["username"]
-    
+    st.switch_page("pages/Home.py")
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
 elif st.session_state["authentication_status"] is None:
     st.warning('Please enter your username and password')
-    
   
+
 st.page_link("pages/My Account.py", label="Reset Password?")
 st.page_link("pages/Registration.py", label="Register an Account")
