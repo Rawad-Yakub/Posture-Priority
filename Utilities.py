@@ -1,7 +1,7 @@
-import cv2                      #computer vision
+import cv2                           #computer vision
 import math as m
 import matplotlib.pyplot as plt 
-import mediapipe as mp          #body recognition
+import mediapipe as mp               #body recognition
 import numpy as np
 from PIL import Image
 import streamlit as st
@@ -89,10 +89,10 @@ def EvalImage(image):
     neck_inclination = findAngle(l_shldr_x, l_shldr_y, l_ear_x, l_ear_y)
     torso_inclination = findAngle(l_hip_x, l_hip_y, l_shldr_x, l_shldr_y)
 
-    if neck_inclination > 40 or neck_inclination > 10:
-            st.write("Your posture is bad")
-    else:
-            st.write("Your posture is good")
+    if not neck_inclination:
+        raise TypeError("Photo incompatible")
+  
+
     
     visualize_landmark_coordinates(image, l_knee_x, l_knee_y)
     return neck_inclination, torso_inclination
