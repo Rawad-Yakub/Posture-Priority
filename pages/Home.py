@@ -22,7 +22,7 @@ from st_files_connection import FilesConnection
 import yaml
 from yaml.loader import SafeLoader
 from dontcommit import my_config
-from Utilities import process_image, draw_landmarks, extract_landmark_coordinates, visualize_landmark_coordinates, findAngle, EvalImage
+from pages.Utilities import process_image, draw_landmarks, extract_landmark_coordinates, visualize_landmark_coordinates, findAngle, EvalImage
 from Calendar import makeCalendar, photoRequest
 from navigation import make_navbar, set_padding
 
@@ -32,8 +32,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state='auto'
 )
-make_navbar()
-set_padding()
 
 CURR_DATE = str(date.today())
 st.title('Posture Priority')
@@ -59,6 +57,7 @@ db = client.test_database
 collection = db['test_PP']
 fs = s3fs.S3FileSystem(anon=False, key=s3_key, secret=s3_secret)        ##init s3 filesystem
 GPT_Client = OpenAI(api_key=GPT_key)
+
 ##################################################
 with fs.open('posturepriorityawsbucket/'+"config.yaml", 'rb') as file:
     config = yaml.load(file, Loader=SafeLoader)
@@ -70,6 +69,9 @@ authenticator = stauth.Authenticate(
     config['cookie']['expiry_days'],
     config['preauthorized']
 )
+
+make_navbar()
+set_padding()
 
 if st.session_state["authentication_status"]:
     st.write(f'Welcome, *{st.session_state["name"]}*!')
@@ -201,12 +203,12 @@ if st.session_state["authentication_status"]:
         #st.image(view_photo)
         image = np.array(bytearray(view_photo), dtype=np.uint8)
         neck, torso = EvalImage(image)
-        question = "What are some exercises or stretches to improve posture with a neck angle of " + str(neck) +  "and a torso inclination angle of " + str(torso) + "?" + "Briefly describe the posture as well."
+        question = "What are 3 exercises or stretches to improve posture with a neck angle of " + str(neck) +  "and a torso inclination angle of " + str(torso) + "?" + "Briefly describe the posture as well. Limit to 155 words."
         response = GPT_Client.chat.completions.create(model = "gpt-3.5-turbo",
         messages = [
             {"role": "user", "content": question}
         ],
-        max_tokens=180,
+        max_tokens=210,
         temperature=0.9,
         frequency_penalty=0.5,
         presence_penalty=0.5)

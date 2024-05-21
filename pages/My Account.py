@@ -45,7 +45,6 @@ if st.session_state["authentication_status"]:
     except Exception as e:
         st.error(e)
     authenticator.logout()
-    st.switch_page("pages/Home.py")
 else:
     st.header("You're not logged in!")
     st.page_link("pages/Login.py", label="Log in, sign up, or...", icon="💾")
