@@ -6,19 +6,33 @@ credentials:
   usernames:
     aaa:
       email: aaa@aaa.com
+      failed_login_attempts: 0
       logged_in: false
       name: AAA AAA
-      password: abc
+      password: $2b$12$ahNIv6/Ho6fChp6kA5EyOOrAaWEE1fU0DZ7v1B1nIylCGr6NTyfIO
+    april14:
+      email: abc@abc.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: april
+      password: $2b$12$torfwAC6HUMHA8aDHH.mYeX7yaXsEhkbzxon17hhimwrsTMYVkIvS
+    hello14:
+      email: hello@abc.com
+      logged_in: false
+      name: hello
+      password: $2b$12$/vyeiaXSHulei8WZFL4rFu8RUTpC6MWu6PGfFCInqSxjgbGrGKfX2
     jonelm01:
       email: jonelm1901@gmail.com
+      failed_login_attempts: 0
       logged_in: false
       name: Jonel Muncan
-      password: abc
+      password: $2b$12$5KJZMHGrloI.PphLUUfr/OYUIoJJWewifJc34hDz6C3EGBbhzSQRu
     testuser00:
       email: test@gmail.com
+      failed_login_attempts: 0
       logged_in: false
       name: Test User
-      password: abc
+      password: $2b$12$vyo.E24L0l3CR8fwZQPIPuoi1Vls/KxY8Z2/HQCoergDve5CfBqS2
 preauthorized:
   emails:
   - melsby@gmail.com
