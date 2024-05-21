@@ -1,0 +1,121 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Streamlit Component</title>
+    <style>
+      :root {
+        --body-background-color: transparent; 
+      }
+
+      .navbar {
+        background-color: black; 
+        color: white;
+        overflow: hidden;
+        border-bottom: 2px solid white;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+        display: flex;
+        justify-content: left;
+        align-items: center;
+        padding: 10px 20px;
+      }
+      .logo {
+        color: white;
+        font-size: 24px;
+        padding: 10px 20px;
+      }
+      .navbar button {
+        background-color: black;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+      }
+      .navbar button:hover {
+        background-color: #ddd;
+        color: black;
+      }
+
+      body, html {
+        background-color: var(--body-background-color);
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar">
+      <div id="logo" class="logo"></div>
+      <div id="nav-buttons-container"></div>
+    </div>
+
+    <script>
+      function sendMessageToStreamlitClient(type, data) {
+        var outData = Object.assign({
+          isStreamlitMessage: true,
+          type: type,
+        }, data);
+        window.parent.postMessage(outData, "*");
+      }
+
+      function init() {
+        sendMessageToStreamlitClient("streamlit:componentReady", {apiVersion: 1});
+      }
+
+      function setFrameHeight(height) {
+        sendMessageToStreamlitClient("streamlit:setFrameHeight", {height: height});
+      }
+
+      function sendDataToPython(data) {
+        sendMessageToStreamlitClient("streamlit:setComponentValue", data);
+      }
+
+      var logoElement = document.getElementById("logo");
+      var navButtonsContainer = document.getElementById("nav-buttons-container");
+
+      function onDataFromPython(event) {
+        if (event.data.type !== "streamlit:render") return;
+
+        var logo = event.data.args.logo;  // Access logo text sent from Python here
+        var navLinks = event.data.args.nav_links;  // Access nav links dictionary from Python here
+        var bodyColor = event.data.args.body_color;  // Access body color sent from Python here
+
+        // Set logo
+        logoElement.innerHTML = logo;
+
+        // Set body background color
+        document.documentElement.style.setProperty("--body-background-color", bodyColor);
+
+        // Clear existing buttons
+        navButtonsContainer.innerHTML = '';
+
+        // Create buttons dynamically
+        for (var label in navLinks) {
+          if (navLinks.hasOwnProperty(label)) {
+            var button = document.createElement("button");
+            button.innerText = label;
+            button.value = navLinks[label];
+            button.addEventListener("click", function(event) {
+              sendDataToPython({
+                value: event.target.value,
+                dataType: "json",
+              });
+            });
+            navButtonsContainer.appendChild(button);
+          }
+        }
+      }
+
+      window.addEventListener("message", onDataFromPython);
+      init();
+
+      window.addEventListener("load", function() {
+        window.setTimeout(function() {
+          setFrameHeight(document.documentElement.clientHeight);
+        }, 0);
+      });
+    </script>
+  </body>
+</html>
